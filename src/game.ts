@@ -62,8 +62,21 @@ export default class TiltGame extends Phaser.Scene {
   		this.load.image('3-bg5', 'assets/trampoloonatics/m6/5.png');
 
 		this.scene.scene.scale.on('resize', () => {
-			const width = window.visualViewport.width * window.devicePixelRatio;
-			const height = window.visualViewport.height * window.devicePixelRatio;
+			const gameContainer = document.getElementById('game-container');
+
+
+			const header = document.querySelector('#site-header');
+
+			// Set the game containers to 100% of the visible viewport height minus the height of the header
+			gameContainer.style.height = `calc(100vh - ${header.clientHeight}px)`;
+			gameContainer.style.width = '100%';
+			const parentDimensions = {
+				width: gameContainer.offsetWidth,
+  				height: gameContainer.offsetHeight
+			};
+				
+			const width = parentDimensions.width * window.devicePixelRatio;
+			const height = parentDimensions.height * window.devicePixelRatio;
 			if(
 				this.scene.scene.scale.width !== width ||
 				this.scene.scene.scale.height !== height
@@ -117,7 +130,7 @@ export default class TiltGame extends Phaser.Scene {
 		// Set background
 		
 		const backgroundTimer = this.time.addEvent({
-			delay: 20000, // 30 seconds in milliseconds
+			delay: 10000,
 			loop: true,
 			callback: this.setupBackground.bind(this)
 		});
@@ -142,9 +155,9 @@ export default class TiltGame extends Phaser.Scene {
 
 
 		// Score
-		const scoreFactor = 100000;
+		const scoreFactor = 10000;
 		if(!this.isGameOver) {
-            this.playedTime += time;
+            this.playedTime += 1000;
 			this.updateScore(Math.floor(this.playedTime / scoreFactor));
 		} else {
 			return;
@@ -177,10 +190,9 @@ export default class TiltGame extends Phaser.Scene {
 			const horizontalVelocity = this.ball.body.velocity.x + this.trampoline.body.velocity.x;
 			const velocityFactor = Math.random() * 3 - 1.5;
 			let finalVelocity = (horizontalVelocity || this.ballVelocityY) * velocityFactor;
-
-			if(finalVelocity < -1 || finalVelocity > 1) {
-				finalVelocity = this.ballVelocityY * velocityFactor;
-			}
+			
+			finalVelocity = this.ballVelocityY * velocityFactor;
+		
 			this.trampoline.anims.play('bouncing');
 			this.ball.setVelocityX(finalVelocity);
 		});
@@ -403,7 +415,11 @@ export default class TiltGame extends Phaser.Scene {
                         newAcceleration *= -1;
                     }
                 }
-                this.trampoline.setAccelerationX(newAcceleration * -1);
+
+				if(newAcceleration > 0) {
+
+				}
+                this.trampoline.setVelocityX(newAcceleration * -1);
             });
         } else {
 			console.warn("Device orientation not supported");
@@ -424,7 +440,6 @@ export default class TiltGame extends Phaser.Scene {
 			//@ts-ignore
 			window.DeviceMotionEvent.requestPermission()
 				.then(permissionState => {
-					debugger
 					if (permissionState === 'granted') {
 						this.scene.restart();
 						this.setupTrampoline();
@@ -442,24 +457,28 @@ export default class TiltGame extends Phaser.Scene {
 }
 
 const gameContainer = document.getElementById('game-container');
+
+
+const header = document.querySelector('#site-header');
+
+// Set the game containers to 100% of the visible viewport height minus the height of the header
+gameContainer.style.height = `calc(100vh - ${header.clientHeight}px)`;
+gameContainer.style.width = '100%';
+
+
+const parentDimensions = {
+	width: gameContainer.offsetWidth,
+	height: gameContainer.offsetHeight
+};
 const config: Phaser.Types.Core.GameConfig = {
     
     type: Phaser.AUTO,
     backgroundColor: '#125555',
-    // width: 756,
-    // height: (window.visualViewport.height * window.devicePixelRatio) | 800,
     scale: {
-
         mode: Phaser.Scale.FIT,
-
         autoCenter: Phaser.Scale.CENTER_BOTH,
-
-        
-        
-        // width: '100%',
-        // height: '100%',
-        width: window.visualViewport.width * window.devicePixelRatio,
-        height: window.visualViewport.height * window.devicePixelRatio,
+        width: parentDimensions.width * window.devicePixelRatio,
+        height: parentDimensions.height * window.devicePixelRatio,
     },
     
     scene: TiltGame,
