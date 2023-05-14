@@ -63,20 +63,20 @@ export default class TiltGame extends Phaser.Scene {
 
 		this.scene.scene.scale.on('resize', () => {
 			const gameContainer = document.getElementById('game-container');
-
-
+			
+			
 			const header = document.querySelector('#site-header');
-
 			// Set the game containers to 100% of the visible viewport height minus the height of the header
-			gameContainer.style.height = `calc(100vh - ${header.clientHeight}px)`;
+			gameContainer.style.height = `${window.innerHeight - header.clientHeight}px`;
 			gameContainer.style.width = '100%';
+			
 			const parentDimensions = {
-				width: gameContainer.offsetWidth,
-  				height: gameContainer.offsetHeight
+				width: gameContainer.getBoundingClientRect().width,
+				height: gameContainer.getBoundingClientRect().height
 			};
 				
-			const width = parentDimensions.width * window.devicePixelRatio;
-			const height = parentDimensions.height * window.devicePixelRatio;
+			const width = parentDimensions.width;
+			const height = parentDimensions.height;
 			if(
 				this.scene.scene.scale.width !== width ||
 				this.scene.scene.scale.height !== height
@@ -460,15 +460,14 @@ const gameContainer = document.getElementById('game-container');
 
 
 const header = document.querySelector('#site-header');
-
 // Set the game containers to 100% of the visible viewport height minus the height of the header
-gameContainer.style.height = `calc(100vh - ${header.clientHeight}px)`;
+gameContainer.style.height = `${window.innerHeight - header.clientHeight}px`;
 gameContainer.style.width = '100%';
 
 
 const parentDimensions = {
-	width: gameContainer.offsetWidth,
-	height: gameContainer.offsetHeight
+	width: gameContainer.getBoundingClientRect().width,
+	height: gameContainer.getBoundingClientRect().height
 };
 const config: Phaser.Types.Core.GameConfig = {
     
@@ -477,8 +476,8 @@ const config: Phaser.Types.Core.GameConfig = {
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: parentDimensions.width * window.devicePixelRatio,
-        height: parentDimensions.height * window.devicePixelRatio,
+        width: parentDimensions.width,
+        height: parentDimensions.height,
     },
     
     scene: TiltGame,
