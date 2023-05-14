@@ -390,44 +390,65 @@ export default class TiltGame extends Phaser.Scene {
 		});
 
 		
-        // Add an event listener for a user gesture (e.g. click)
-        if (window.DeviceMotionEvent) {
-            const velocityFactor = 0.5;
-            let rotationAngle = 0;
-            let lastTimestamp = null;
-            window.addEventListener('devicemotion', (event) => {
-                const rotation = event.rotationRate;
-                const timestamp = event.timeStamp;
-                
-                if (lastTimestamp !== null) {
-                    const timeDelta = (timestamp - lastTimestamp) / 1000; // Convert to seconds
-                    const deltaAngle = rotation.gamma * timeDelta;
-                    rotationAngle += deltaAngle;
-                }
-                lastTimestamp = timestamp;
-
-                let newAcceleration = rotationAngle + (rotationAngle * velocityFactor);
-                if(rotationAngle > 0) {
-                    newAcceleration += rotationAngle * rotation.gamma;
-                } else {
-                    newAcceleration += rotationAngle * rotation.gamma;
-                    if(newAcceleration > 0) {
-                        newAcceleration *= -1;
-                    }
-                }
-
-				if(newAcceleration > 0) {
-
-				}
-                this.trampoline.setVelocityX(newAcceleration * -1);
-            });
-        } else {
-			console.warn("Device orientation not supported");
-		}
+		this.setMovement();
 		// Set up the ball
 		this.setupBall();
 		// Colliders
 		this.setupColliders();
+	}
+
+	
+	setMovement() {
+		// Add an event listener for a user gesture (e.g. click)
+		if (window.DeviceMotionEvent) {
+			// Variables to store motion data
+			let accelerationX = 0;
+			let previousAccelerationX = 0;
+
+			// Scaling factor to adjust the sensitivity
+			const scalingFactor = 100;
+
+			// Threshold value to detect direction change
+			const directionThreshold = 0.5;
+
+			// Low-pass filter variables
+			const alpha = 0.8;
+			window.addEventListener('devicemotion', (event) => {
+				 // Extract the raw acceleration values
+				const rawAccelerationX = event.accelerationIncludingGravity.x * scalingFactor;
+
+				// Apply the low-pass filter
+				accelerationX = alpha * previousAccelerationX + (1 - alpha) * rawAccelerationX;
+
+				// Determine the direction of motion
+				let direction = '';
+				if (accelerationX - previousAccelerationX > directionThreshold) {
+					direction = 'right';
+					this.rightKeyPressed = true;
+					this.leftKeyPressed = false;
+				} else if (previousAccelerationX - accelerationX > directionThreshold) {
+					this.leftKeyPressed = true;
+					this.rightKeyPressed = false;
+					direction = 'left';
+				}
+
+				// Update the phaser object position based on direction
+				if (direction === 'right') {
+					// Move the phaser object to the right
+					// Add your code here to update the position accordingly
+				} else if (direction === 'left') {
+					// Move the phaser object to the left
+					// Add your code here to update the position accordingly
+				}
+
+				// Store the current acceleration as previous for the next iteration
+				previousAccelerationX = accelerationX;
+				console.log(accelerationX);
+				this.trampoline.setVelocityX(accelerationX);
+			});
+		} else {
+			console.warn("Device orientation not supported");
+		}
 	}
 
 	requestDeviceMotionPermissions() {
